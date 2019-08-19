@@ -1,52 +1,37 @@
 <template>
     <div class="container">
-    <div class="row">
-        <div class="col-sm-3">
-        </div>
-        <div class="col-sm-6">
+        <div class="col-lg-6 mx-auto">
             <h1>{{title}}</h1>
             <h5>{{subTitle}}</h5>
             <div class="form-label-group">
                 <input type="text" class="form-control" placeholder="What are you doing?" v-model="newTodo" @keyup.enter="addTodo">
             </div>
             <hr>
+            <ItemRemaining :remaining="remaining"/>
+            <hr>
             <h3 v-if="showNoItems" class="mb-0">No items available</h3>
             <ul class="list-group">
-                <li class="list-group-item text-left" v-for="(todo,index) in todosFiltered">
-                    <div class="todo-item-label" :class="{done:todo.completed}" v-if="!todo.editing">
-                        {{todo.title}}
-                    </div>
-                    <div class="todo-item-input" v-else>
-                        <input type="text" class="form-control" placeholder="What are you doing?" v-model="todo.title" @blur="doneEditTodo(todo)" @keyup.enter="doneEditTodo(todo)" @keyup.esc="cancelEditTodo(todo)" v-focus>
-                    </div>
-                    <hr>
-                    <button type="button" class="btn btn-success btn-sm" @click="doneTodo(todo)">Done</button>
-                    <button type="button" class="btn btn-warning btn-sm" @click="editTodo(todo)">Edit</button>
-                    <button type="button" class="btn btn-danger btn-sm" @click="removeTodo(index)">Remove</button>
-                </li>
+                <!-- <TodoItem  v-for="(todo,index) in todosFiltered" :key="todo.id" :todo="todo" :index="index" @eventRemoveTodo="removeTodo" @eventDoneEditTodo="eventDoneEditTodo" @eventDoneTodo="doneTodo"/> -->
+                <TodoItem  v-for="(todo,index) in todosFiltered" :key="todo.id" :todo="todo" :index="index"/>
             </ul>
             <hr>
-            <div class="filter">
-                <div class="btn-group" role="group" aria-label="Basic example">
-                    <button type="button" class="btn btn-secondary" :class="{ active:filter=='all'}" @click="filter='all'">All</button>
-                    <button type="button" class="btn btn-secondary" :class="{ active:filter=='active'}" @click="filter='active'">Active</button>
-                    <button type="button" class="btn btn-secondary" :class="{ active:filter=='completed'}" @click="filter='completed'">Completed</button>
-                </div>
-            </div>
-            <hr>
-            <div class="counter text-left">
-                Items left: {{remaining}}
-            </div>
+            <TodoFilter/>
         </div>
-            <div class="col-sm-3">
-        </div>
-    </div>
     </div>
 </template>
 
 <script>
+import TodoItem from './TodoItem';
+import ItemRemaining from './ItemRemaining';
+import TodoFilter from './TodoFilter';
+
 export default {
     name: 'todo-list',
+    components: {
+        TodoItem,
+        ItemRemaining,
+        TodoFilter,
+    },
     data(){
         return {
             newTodo: "",
@@ -77,6 +62,12 @@ export default {
             subTitle: "Yet another super duper simple todo app"
         }
     },
+    created(){
+        eventBus.$on("eventRemoveTodo", (index)=>this.removeTodo(index));
+        eventBus.$on("eventDoneEditTodo", (data)=>this.eventDoneEditTodo(data));
+        eventBus.$on("eventDoneTodo", (todo)=>this.doneTodo(todo));
+        eventBus.$on("eventChangeFilter", (filter)=>this.filter = filter);
+    },
     computed: {
         remaining(){
             return this.todos.filter(item => !item.completed).length;
@@ -100,13 +91,13 @@ export default {
             }
         }
     },
-    directives: {
-        focus: {
-            inserted: function(el){
-                el.focus()
-            }
-        }
-    },
+    // directives: {
+    //     focus: {
+    //         inserted: function(el){
+    //             el.focus()
+    //         }
+    //     }
+    // },
     methods: {
         addTodo(){
             if(this.newTodo.trim().length == 0){
@@ -121,20 +112,23 @@ export default {
                 this.idForTodo++;
             }
         },
-        editTodo(todo){
-            todo.beforeEditCache = todo.title;
-            todo.editing = true;
+        // editTodo(todo){
+        //     todo.beforeEditCache = todo.title;
+        //     todo.editing = true;
+        // },
+        // doneEditTodo(todo){
+        //     if(todo.title.trim().length == 0){
+        //         todo.title = todo.beforeEditCache;
+        //     }
+        //     todo.editing = false;
+        // },
+        eventDoneEditTodo(data){
+            this.todos.splice(data.index, 1, data.todo);
         },
-        doneEditTodo(todo){
-            if(todo.title.trim().length == 0){
-                todo.title = todo.beforeEditCache;
-            }
-            todo.editing = false;
-        },
-        cancelEditTodo(todo){
-            todo.title = todo.beforeEditCache;
-            todo.editing = false;
-        },
+        // cancelEditTodo(todo){
+        //     todo.title = todo.beforeEditCache;
+        //     todo.editing = false;
+        // },
         removeTodo(index){
             this.todos.splice(index,1)
         },
