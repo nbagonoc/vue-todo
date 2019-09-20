@@ -16,10 +16,15 @@ export default {
             "filter":"all"
         }
     },
+    computed: {
+        filter(){
+            return this.$store.state.filter
+        }
+    },
     methods: {
         changeFilter(filter){
-            this.filter = filter;
-            eventBus.$emit('eventChangeFilter',filter);
+            this.$store.state.filter = filter;
+            // eventBus.$emit('eventChangeFilter',filter);
         }
     }
 }

@@ -64,7 +64,7 @@
     methods: {
       removeTodo(index) {
         // this.$emit("eventRemoveTodo", index);
-        eventBus.$emit("eventRemoveTodo", index);
+        this.$store.state.todos.splice(index,1)
       },
       editTodo() {
         // console.log("editing state");
@@ -77,16 +77,23 @@
           this.title = this.beforeEditCache;
         }
         this.editing = false;
-        // this.$emit("eventDoneEditTodo", {
-        eventBus.$emit("eventDoneEditTodo", {
-          index: this.index,
-          todo: {
-            id: this.id,
-            title: this.title,
-            completed: this.completed,
-            editing: this.editing
-          }
+        const index = this.$store.state.todos.findIndex(item => item.id == this.id);
+        this.$store.state.todos.splice(index, 1, {
+            "id": this.id,
+            "title": this.title,
+            "completed": this.completed,
+            "editing": this.editing,
         });
+        // this.$emit("eventDoneEditTodo", {
+        // eventBus.$emit("eventDoneEditTodo", {
+        //   index: this.index,
+        //   todo: {
+        //     id: this.id,
+        //     title: this.title,
+        //     completed: this.completed,
+        //     editing: this.editing
+        //   }
+        // });
       },
       cancelEditTodo() {
         // console.log("esc was pressed");

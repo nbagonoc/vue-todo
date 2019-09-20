@@ -63,32 +63,20 @@ export default {
         }
     },
     created(){
-        eventBus.$on("eventRemoveTodo", (index)=>this.removeTodo(index));
+        // eventBus.$on("eventRemoveTodo", (index)=>this.removeTodo(index));
         eventBus.$on("eventDoneEditTodo", (data)=>this.eventDoneEditTodo(data));
         eventBus.$on("eventDoneTodo", (todo)=>this.doneTodo(todo));
-        eventBus.$on("eventChangeFilter", (filter)=>this.filter = filter);
+        eventBus.$on("eventChangeFilter", (filter)=>this.$store.state.filter = filter);
     },
     computed: {
         remaining(){
-            return this.todos.filter(item => !item.completed).length;
+            return this.$store.getters.remaining
         },
         todosFiltered(){
-            if(this.filter == 'all'){
-                return this.todos;
-            } else if(this.filter == 'active'){
-                return this.todos.filter(item => !item.completed);
-            } else if(this.filter == 'completed'){
-                return this.todos.filter(item => item.completed);
-            }
+            return this.$store.getters.todosFiltered
         },
         showNoItems(){
-            if(this.filter == 'all'){
-                return this.todos.length == 0;
-            } else if(this.filter == 'active'){
-                return this.todos.filter(item => !item.completed).length == 0;
-            } else if(this.filter == 'completed'){
-                return this.todos.filter(item => item.completed).length == 0;
-            }
+            return this.$store.getters.showNoItems
         }
     },
     // directives: {
@@ -103,7 +91,7 @@ export default {
             if(this.newTodo.trim().length == 0){
                 return
             } else {
-                this.todos.push({
+                this.$store.state.todos.push({
                     id: this.idForTodo,
                     title: this.newTodo,
                     completed: false,
@@ -122,16 +110,16 @@ export default {
         //     }
         //     todo.editing = false;
         // },
-        eventDoneEditTodo(data){
-            this.todos.splice(data.index, 1, data.todo);
-        },
+        // eventDoneEditTodo(data){
+        //     this.$store.state.todos.splice(data.index, 1, data.todo);
+        // },
         // cancelEditTodo(todo){
         //     todo.title = todo.beforeEditCache;
         //     todo.editing = false;
         // },
-        removeTodo(index){
-            this.todos.splice(index,1)
-        },
+        // removeTodo(index){
+        //     this.$store.state.todos.splice(index,1)
+        // },
         doneTodo(todo){
             todo.completed = true;
         }
